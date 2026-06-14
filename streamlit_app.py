@@ -51,9 +51,12 @@ def generate_simple_equation(exercise_amount):
         
         st.write(f"Exercise {i+1}:")
         st.latex(f"{a_string} {b_string} {c_string} = 0")
-
-        with st.expander("Show Solution Key"):
-                st.write(f"Answers: $x = {r1}, x = {r2}$")
+        if(r1 != r2):
+            with st.expander("Show Solution Key"):
+                    st.write(f"Answers: $x_1 = {r1}, x_2 = {r2}$")
+        else:
+             with st.expander("Show Solution Key"):
+                    st.write(f"Answers: $x_1 = x_2 = {r1}$") 
 
 def generate_advanced_equation(exercise_amount):
     for i in range(exercise_amount):
@@ -83,8 +86,12 @@ def generate_advanced_equation(exercise_amount):
         root1_latex = format_latex_fraction(r1, d1)
         root2_latex = format_latex_fraction(r2, d2)
 
-        with st.expander("Show Solution Key"):
-                st.write(f"Answers: $x_1 = {root1_latex}, x_2 = {root2_latex}$")
+        if(r1 != r2):
+            with st.expander("Show Solution Key"):
+                    st.write(f"Answers: $x_1 = {root1_latex}, x_2 = {root2_latex}$")
+        else:
+             with st.expander("Show Solution Key"):
+                    st.write(f"Answers: $x_1 = x_2 = {root1_latex}$")
 
 
 
@@ -96,8 +103,16 @@ st.write(
 st.write("Your quadratic equations is: ")
 
 exercise_amount = st.slider("Choose number of exercises", 1, 10, 5, 1, )
+option = st.radio("Choose exercise type", ["Simple quadratic equation", "Advanced quadratic equation", "Both"])
 
-generate_simple_equation(exercise_amount)
-
-generate_advanced_equation(exercise_amount)
-
+if option == "Simple quadratic equation":
+    st.write("Simple exercises:")
+    generate_simple_equation(exercise_amount)
+elif option == "Advanced quadratic equation":
+    st.write("Advanced exercises:")
+    generate_advanced_equation(exercise_amount)
+else:
+     st.write("Simple exercises:")
+     generate_simple_equation(exercise_amount)
+     st.write("Advanced exercises:")
+     generate_advanced_equation(exercise_amount)
