@@ -147,7 +147,6 @@ for i, item in enumerate(st.session_state.current_worksheet):
     st.write("---")
 
 if st.session_state.current_worksheet:
-    st.write("---")
     st.write("### Export Options:")
 
     # Build pdf data
