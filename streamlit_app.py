@@ -87,44 +87,12 @@ def generate_advanced_equation(exercise_amount):
         
     return problems
 
-st.title("Quadratic equation generator")
-st.write("Let's start generating!")
-
-# Hidden print layout CSS styles injected right into the webpage header
-st.markdown("""
-    <style>
-        @media print {
-            /* Hide user controls, sidebars, buttons, and decorative breaks */
-            header, [data-testid="stSidebar"], .stButton, iframe, hr {
-                display: none !important;
-            }
-            
-            /* Flatten application container backgrounds for standard white paper margins */
-            .main .block-container {
-                padding-top: 15mm !important;
-                padding-bottom: 15mm !important;
-                max-width: 100% !important;
-            }
-            
-            /* Force closed expander boxes to snap wide open automatically on paper */
-            [data-testid="stExpander"] div {
-                display: block !important;
-                height: auto !important;
-                opacity: 1 !important;
-            }
-            
-            /* Custom CSS class to drop a structural page break when printing */
-            .print-page-break {
-                page-break-before: always;
-                display: block;
-            }
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 # 1. Initialize State Storage Memory
 if "current_worksheet" not in st.session_state:
     st.session_state.current_worksheet = []
+
+st.title("Quadratic equation generator")
+st.write("Let's start generating!")
 
 exercise_amount = st.slider("Choose number of exercises", 1, 10, 5, 1, )
 option = st.radio("Choose exercise type", ["Simple quadratic equation", "Advanced quadratic equation", "Both (Mixed)"])
@@ -150,39 +118,22 @@ if st.button("🔄 Generate Exercises") or not st.session_state.current_workshee
         
         st.session_state.current_worksheet = combined_list
 
-# Frontend
-if st.session_state.current_worksheet:
-    st.write("---")
-    st.write("### 📝 Current Worksheet Preview")
+# 4. CLEAN LAYOUT RENDERING STEP
+st.write("---")
+st.write("### Your Generated Worksheet:")
+
+for i, item in enumerate(st.session_state.current_worksheet):
+    # Split the row into two clean columns
+    col1, col2 = st.columns(2, vertical_alignment="center")
     
-    # The Student's Question Sheet
-    st.markdown("#### Exercises")
-    for idx, item in enumerate(st.session_state.current_worksheet):
-        st.write(f"**Exercise {idx+1}:**")
+    with col1:
+        st.write(f"**Exercise {i+1}:**")
         st.write(f"$${item['equation']}$$")
-        st.write("")  # Adds small spacing buffers between rows
         
-    # Break Element: Active only when printed to separate pages!
-    st.markdown('<div class="print-page-break"></div>', unsafe_allow_html=True)
-    
-    # Solution Key Sheet
-    st.write("---")
-    st.markdown("#### Answer Key Solutions")
-    for idx, item in enumerate(st.session_state.current_worksheet):
-        with st.expander(f"Solution Key for Exercise {idx+1}"):
+    with col2:
+        # Sneak a blank string in to visually balance vertical alignment with the equation
+        st.write("")
+        with st.expander("Show Solution"):
             st.write(f"$${item['solution']}$$")
             
-    # Print Dialog Action Trigger
     st.write("---")
-    st.write("### Export Options:")
-    st.components.v1.html(
-        """
-        <button style="
-            background-color: #FF4B4B; color: white; border: none; 
-            padding: 12px 24px; font-size: 16px; border-radius: 8px; 
-            cursor: pointer; width: 100%; font-family: sans-serif;
-            font-weight: bold;
-        " onclick="window.parent.print()">Format & Save Worksheet as PDF</button>
-        """,
-        height=60,
-    )
