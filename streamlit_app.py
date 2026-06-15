@@ -1,24 +1,27 @@
 import streamlit as st
 import random
 from fractions import Fraction
+from pdf_compiler import compile_pdf
 
 a_special_cases = {1: "x^2", -1: "-x^2"}
-b_special_cases = { 1:"+ x", -1: "- x", 0: ""}
-c_special_cases = {0:""}
+b_special_cases = {1: "+ x", -1: "- x", 0: ""}
+c_special_cases = {0: ""}
+
 
 def format_latex_fraction(numerator, denominator):
     f = Fraction(numerator, denominator)
-    
+
     num = f.numerator
     den = f.denominator
-    
+
     if den == 1:
         return f"{num}"
-        
+
     if num < 0:
         return f"-\\frac{{{abs(num)}}}{{{den}}}"
 
     return f"\\frac{{{num}}}{{{den}}}"
+
 
 def generate_simple_equation(exercise_amount):
     problems = []
@@ -38,17 +41,18 @@ def generate_simple_equation(exercise_amount):
         a_string = "x^2"
         b_string = b_special_cases.get(b, f"{b_sign} {b}x")
         c_string = c_special_cases.get(c, f"{c_sign} {c}")
-        
+
         eq_latex = f"{a_string} {b_string} {c_string} = 0"
-        
+
         if r1 != r2:
             sol_latex = f"x_1 = {r1}, \\quad x_2 = {r2}"
         else:
             sol_latex = f"x_1 = x_2 = {r1}"
-            
+
         problems.append({"equation": eq_latex, "solution": sol_latex})
-        
+
     return problems
+
 
 def generate_advanced_equation(exercise_amount):
     problems = []
@@ -72,7 +76,7 @@ def generate_advanced_equation(exercise_amount):
         a_string = a_special_cases.get(a, f"{a}x^2")
         b_string = b_special_cases.get(b, f"{b_sign} {b}x")
         c_string = c_special_cases.get(c, f"{c_sign} {c}")
-        
+
         eq_latex = f"{a_string} {b_string} {c_string} = 0"
 
         root1_latex = format_latex_fraction(r1, d1)
@@ -82,10 +86,11 @@ def generate_advanced_equation(exercise_amount):
             sol_latex = f"x_1 = {root1_latex}, \\quad x_2 = {root2_latex}"
         else:
             sol_latex = f"x_1 = x_2 = {root1_latex}"
-            
+
         problems.append({"equation": eq_latex, "solution": sol_latex})
-        
+
     return problems
+
 
 # 1. Initialize State Storage Memory
 if "current_worksheet" not in st.session_state:
@@ -95,27 +100,30 @@ st.title("Quadratic equation generator")
 st.write("Let's start generating!")
 
 exercise_amount = st.slider("Choose number of exercises", 1, 10, 5, 1, )
-option = st.radio("Choose exercise type", ["Simple quadratic equation", "Advanced quadratic equation", "Both (Mixed)"])
+option = st.radio("Choose exercise type", [
+                  "Simple quadratic equation", "Advanced quadratic equation", "Both (Mixed)"])
 
 if st.button("🔄 Generate Exercises") or not st.session_state.current_worksheet:
     if option == "Simple quadratic equation":
-        st.session_state.current_worksheet = generate_simple_equation(exercise_amount)
-        
+        st.session_state.current_worksheet = generate_simple_equation(
+            exercise_amount)
+
     elif option == "Advanced quadratic equation":
-        st.session_state.current_worksheet = generate_advanced_equation(exercise_amount)
-        
+        st.session_state.current_worksheet = generate_advanced_equation(
+            exercise_amount)
+
     else:  # "Both (Mixed)" option
         half = exercise_amount // 2
         remainder = exercise_amount - half
-        
+
         # Call both functions separately and combine their outputs together!
         simple_part = generate_simple_equation(half)
         advanced_part = generate_advanced_equation(remainder)
-        
+
         combined_list = simple_part + advanced_part
         # Shuffle the mixed items so they are randomly distributed
         random.shuffle(combined_list)
-        
+
         st.session_state.current_worksheet = combined_list
 
 # 4. CLEAN LAYOUT RENDERING STEP
@@ -125,15 +133,29 @@ st.write("### Your Generated Worksheet:")
 for i, item in enumerate(st.session_state.current_worksheet):
     # Split the row into two clean columns
     col1, col2 = st.columns(2, vertical_alignment="center")
-    
+
     with col1:
         st.write(f"**Exercise {i+1}:**")
         st.write(f"$${item['equation']}$$")
-        
+
     with col2:
         # Sneak a blank string in to visually balance vertical alignment with the equation
         st.write("")
         with st.expander("Show Solution"):
             st.write(f"$${item['solution']}$$")
-            
+
     st.write("---")
+
+if st.session_state.current_worksheet:
+    st.write("---")
+    st.write("### Export Options:")
+
+    # Build pdf data
+    pdf_data = compile_pdf(st.session_state.current_worksheet)
+
+    st.download_button(
+        label="Download Printable PDF (Worksheet + Answer Key)",
+        data=pdf_data,
+        file_name="Quadratic_Worksheet.pdf",
+        mime="application/pdf"
+    )
