@@ -1,19 +1,11 @@
-# 🎈 Blank app template
+# Quadratic equation generator
 
-A simple Streamlit app template for you to modify!
+### Features
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-template.streamlit.app/)
+The program is currently capable of generating up to 10 exercises of:
 
-### How to run it on your own machine
+1. Simple quadratic equations where a = 1
+2. Advanced quadratic equations
+3. Mixed variant
 
-1. Install the requirements
-
-   ```
-   $ pip install -r requirements.txt
-   ```
-
-2. Run the app
-
-   ```
-   $ streamlit run streamlit_app.py
-   ```
+Exporting to PDF is available as well. 
