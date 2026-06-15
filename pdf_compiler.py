@@ -1,53 +1,76 @@
-from fpdf import FPDF
-import os
+# Inside pdf_compiler.py
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+import io
 
 
 def compile_pdf(worksheet_data):
-    pdf = FPDF(orientation="P", unit="mm", format="letter")
-    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf_buffer = io.BytesIO()
 
-    font_path = os.path.join("fonts", "STIXTwoMath-Regular.ttf")
-    pdf.add_font("MathFont", style="", fname=font_path)
+    with PdfPages(pdf_buffer) as pdf:
 
-    # PAGE 1: STUDENT COPY
-    pdf.add_page()
+        # PAGE 1: STUDENT WORKSHEET (Questions Only)
 
-    # Header Title
-    pdf.set_font("MathFont", size=22)
-    pdf.cell(w=0, h=15, txt="Quadratic Equations Worksheet", ln=True, align="C")
-    pdf.cell(w=0, h=8, txt="Student Exercises", ln=True, align="L")
-    pdf.ln(5)
+        # Set up a standard Letter-sized layout (8.5 x 11 inches)
+        fig, ax = plt.subplots(figsize=(8.5, 11))
+        ax.axis('off')
 
-    # Print the questions
-    for i, item in enumerate(worksheet_data):
-        pdf.set_font("MathFont", size=12)
-        pdf.cell(w=0, h=6, txt=f"Exercise {i+1}:", ln=True)
+        fig.text(0.5, 0.92, "Quadratic Equations Worksheet",
+                 fontsize=22, weight='bold', ha='center')
+        fig.text(0.1, 0.86, "Student Exercises Copy",
+                 fontsize=13, weight='bold', color='#2b6cb0')
 
-        clean_eq = item["equation"].replace("\\quad", "  ")
+        current_y = 0.78
 
-        # Serif italic font for a standard math textbook look
-        pdf.set_font("MathFont", size=14)
-        pdf.cell(w=0, h=8, txt=f"      {clean_eq}", ln=True)
-        pdf.ln(6)
+        for i, item in enumerate(worksheet_data):
+            # Check if we are running out of room on the page; if so, create a new page
+            if current_y < 0.1:
+                pdf.savefig(fig)
+                plt.close(fig)
+                fig, ax = plt.subplots(figsize=(8.5, 11))
+                ax.axis('off')
+                current_y = 0.85
 
-    # PAGE 2: TUTOR COPY (Answer Key Only)
+            fig.text(0.1, current_y,
+                     f"Exercise {i+1}:", fontsize=11, weight='bold')
 
-    pdf.add_page()
+            latex_equation = f"${item['equation']}$"
+            fig.text(0.15, current_y - 0.04, latex_equation, fontsize=15)
 
-    pdf.set_font("MathFont", size=22)
-    pdf.cell(w=0, h=15, txt="Master Answer Key", ln=True, align="C")
-    pdf.cell(w=0, h=8, txt="Tutor Reference Copy", ln=True, align="L")
-    pdf.ln(5)
+            current_y -= 0.12
 
-    for i, item in enumerate(worksheet_data):
-        pdf.set_font("MathFont", size=12)
-        pdf.write(h=6, txt=f"Solution {i+1}: ")
+        pdf.savefig(fig)
+        plt.close(fig)
 
-        clean_sol = item["solution"].replace("\\quad", "  ").replace("\\", "")
+        # PAGE 2: TEACHER ANSWER KEY (Solutions Only)
 
-        pdf.set_font("MathFont", size=14)
-        pdf.write(h=6, txt=f"{clean_sol}\n")
-        pdf.ln(4)
+        fig, ax = plt.subplots(figsize=(8.5, 11))
+        ax.axis('off')
 
-    # Output as raw stream
-    return bytes(pdf.output())
+        fig.text(0.5, 0.92, "Master Answer Key",
+                 fontsize=22, weight='bold', ha='center')
+        fig.text(0.1, 0.86, "Tutor Reference Copy Only",
+                 fontsize=13, weight='bold', color='#2b6cb0')
+
+        current_y = 0.78
+
+        for i, item in enumerate(worksheet_data):
+            if current_y < 0.1:
+                pdf.savefig(fig)
+                plt.close(fig)
+                fig, ax = plt.subplots(figsize=(8.5, 11))
+                ax.axis('off')
+                current_y = 0.85
+
+            fig.text(0.1, current_y,
+                     f"Solution {i+1}:", fontsize=11, weight='bold')
+
+            latex_solution = f"${item['solution']}$"
+            fig.text(0.15, current_y - 0.04, latex_solution, fontsize=14)
+
+            current_y -= 0.12
+
+        pdf.savefig(fig)
+        plt.close(fig)
+
+    return pdf_buffer.getvalue()
