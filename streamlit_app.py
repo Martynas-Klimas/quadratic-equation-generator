@@ -3,6 +3,19 @@ import random
 from fractions import Fraction
 from pdf_compiler import compile_pdf
 
+st.markdown("""
+    <style>
+        /* Vaporize the header hover link chains */
+        .e16fv1kl0 a {
+            display: none !important;
+        }
+        h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+            display: none !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+
 a_special_cases = {1: "x^2", -1: "-x^2"}
 b_special_cases = {1: "+ x", -1: "- x", 0: ""}
 c_special_cases = {0: ""}
@@ -147,7 +160,7 @@ for i, item in enumerate(st.session_state.current_worksheet):
     st.write("---")
 
 if st.session_state.current_worksheet:
-    st.write("### Export Options:")
+    st.markdown("### Export options")
 
     # Build pdf data
     pdf_data = compile_pdf(st.session_state.current_worksheet)
