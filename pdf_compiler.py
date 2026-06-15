@@ -26,7 +26,7 @@ def compile_pdf(worksheet_data):
         clean_eq = item["equation"].replace("\\quad", "  ")
 
         # Serif italic font for a standard math textbook look
-        pdf.set_font("MathFont", style="I", size=14)
+        pdf.set_font("MathFont", size=14)
         pdf.cell(w=0, h=8, txt=f"      {clean_eq}", ln=True)
         pdf.ln(6)
 
