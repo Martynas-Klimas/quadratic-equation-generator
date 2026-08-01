@@ -105,49 +105,67 @@ def generate_advanced_equation(exercise_amount):
     return problems
 
 
-# 1. Initialize State Storage Memory
+# Initialize State Storage Memory
 if "current_worksheet" not in st.session_state:
     st.session_state.current_worksheet = []
 
 st.title("Quadratic equation generator")
 st.write("Let's start generating!")
 
-exercise_amount = st.slider("Choose number of exercises", 1, 20, 5, 1, )
-option = st.radio("Choose exercise type", [
-                  "Simple quadratic equation", "Advanced quadratic equation", "Both (Mixed)"])
+with st.container():
+    col1, col2 = st.columns([2, 1], vertical_alignment="center", gap="small")
+    with col1:
+        st.subheader("Generation Options")
+        exercise_amount = st.slider("Choose number of exercises:", 1, 20, 5, 1, )
 
-custom_title = st.sidebar.text_input(
-    label="Worksheet Title", 
-    value="Quadratic Equations Worksheet",
-    help="This text will print as the main heading at the top of your PDF."
-)
+        option = st.radio("Choose exercise type:", [
+                "Simple quadratic equation", "Advanced quadratic equation", "Both (Mixed)"])
 
-if st.button("🔄 Generate Exercises") or not st.session_state.current_worksheet:
-    if option == "Simple quadratic equation":
-        st.session_state.current_worksheet = generate_simple_equation(
-            exercise_amount)
+        custom_title = st.text_input(
+            label="Worksheet Title:", 
+            value="Quadratic Equation Worksheet",
+            help="This text will print as the main heading at the top of your PDF."
+        )
 
-    elif option == "Advanced quadratic equation":
-        st.session_state.current_worksheet = generate_advanced_equation(
-            exercise_amount)
+        if st.button("🔄 Generate Exercises") or not st.session_state.current_worksheet:
+            if option == "Simple quadratic equation":
+                st.session_state.current_worksheet = generate_simple_equation(
+                    exercise_amount)
 
-    else:  # "Both (Mixed)" option
-        half = exercise_amount // 2
-        remainder = exercise_amount - half
+            elif option == "Advanced quadratic equation":
+                st.session_state.current_worksheet = generate_advanced_equation(
+                    exercise_amount)
 
-        # Call both functions separately and combine their outputs together!
-        simple_part = generate_simple_equation(half)
-        advanced_part = generate_advanced_equation(remainder)
+            else:  
+                half = exercise_amount // 2
+                remainder = exercise_amount - half
 
-        combined_list = simple_part + advanced_part
-        # Shuffle the mixed items so they are randomly distributed
-        random.shuffle(combined_list)
+                simple_part = generate_simple_equation(half)
+                advanced_part = generate_advanced_equation(remainder)
 
-        st.session_state.current_worksheet = combined_list
+                combined_list = simple_part + advanced_part
+                random.shuffle(combined_list)
 
-# 4. CLEAN LAYOUT RENDERING STEP
+                st.session_state.current_worksheet = combined_list
+    with col2:
+        st.subheader("Export Options")
+        if "current_worksheet" in st.session_state and st.session_state.current_worksheet:
+            if custom_title == "":
+                custom_title = "Quadratic equation worksheet"
+            pdf_bytes = compile_pdf(st.session_state.current_worksheet, custom_title)
+            st.download_button(
+                label="Download Printable PDF (Worksheet + Answer Key)",
+                data=pdf_bytes,
+                file_name=f"{custom_title.replace(' ', '_')}.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+        else:
+            st.info("Click 'Generate' to create your download package.")
+
+# CLEAN LAYOUT RENDERING STEP
 st.write("---")
-st.write("### Your Generated Worksheet:")
+st.write("### Your Generated Exercises:")
 
 for i, item in enumerate(st.session_state.current_worksheet):
     # Split the row into two clean columns
@@ -163,17 +181,4 @@ for i, item in enumerate(st.session_state.current_worksheet):
         with st.expander("Show Solution"):
             st.write(f"$${item['solution']}$$")
 
-    st.write("---")
-
-if st.session_state.current_worksheet:
-    st.markdown("### Export options")
-
-    # Build pdf data
-    pdf_data = compile_pdf(st.session_state.current_worksheet, custom_title)
-
-    st.download_button(
-        label="Download Printable PDF (Worksheet + Answer Key)",
-        data=pdf_data,
-        file_name="Quadratic_Worksheet.pdf",
-        mime="application/pdf"
-    )
+st.write("---")
