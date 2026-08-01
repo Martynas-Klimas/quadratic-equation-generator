@@ -64,7 +64,7 @@ def compile_pdf(worksheet_data, title):
 
         fig.text(0.5, 0.92, f"Answer Key: {title}",
                  fontsize=22, weight='bold', ha='center')
-        fig.text(0.1, 0.86, "Tutor Reference Copy Only",
+        fig.text(0.1, 0.86, "Tutor Reference Copy",
                  fontsize=13, weight='bold', color='#2b6cb0')
 
         current_y = 0.82
