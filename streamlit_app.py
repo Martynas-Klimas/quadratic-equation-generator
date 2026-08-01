@@ -112,9 +112,15 @@ if "current_worksheet" not in st.session_state:
 st.title("Quadratic equation generator")
 st.write("Let's start generating!")
 
-exercise_amount = st.slider("Choose number of exercises", 1, 10, 5, 1, )
+exercise_amount = st.slider("Choose number of exercises", 1, 20, 5, 1, )
 option = st.radio("Choose exercise type", [
                   "Simple quadratic equation", "Advanced quadratic equation", "Both (Mixed)"])
+
+custom_title = st.sidebar.text_input(
+    label="Worksheet Title", 
+    value="Quadratic Equations Worksheet",
+    help="This text will print as the main heading at the top of your PDF."
+)
 
 if st.button("🔄 Generate Exercises") or not st.session_state.current_worksheet:
     if option == "Simple quadratic equation":
@@ -163,7 +169,7 @@ if st.session_state.current_worksheet:
     st.markdown("### Export options")
 
     # Build pdf data
-    pdf_data = compile_pdf(st.session_state.current_worksheet)
+    pdf_data = compile_pdf(st.session_state.current_worksheet, custom_title)
 
     st.download_button(
         label="Download Printable PDF (Worksheet + Answer Key)",

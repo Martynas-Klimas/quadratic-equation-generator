@@ -4,7 +4,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import io
 
 
-def compile_pdf(worksheet_data):
+def compile_pdf(worksheet_data, title):
     pdf_buffer = io.BytesIO()
 
     with PdfPages(pdf_buffer) as pdf:
@@ -14,7 +14,7 @@ def compile_pdf(worksheet_data):
 
         ax.axis('off')
 
-        fig.text(0.5, 0.94, "Quadratic Equations Worksheet", fontsize=22, weight='bold',
+        fig.text(0.5, 0.94, title, fontsize=22, weight='bold',
                  ha='center', bbox=dict(facecolor='white', edgecolor='none', pad=4))
         fig.text(0.1, 0.89, "Student Exercises", fontsize=13, weight='bold',
                  color='#2b6cb0', bbox=dict(facecolor='white', edgecolor='none', pad=2))
@@ -62,7 +62,7 @@ def compile_pdf(worksheet_data):
         fig, ax = plt.subplots(figsize=(8.5, 11))
         ax.axis('off')
 
-        fig.text(0.5, 0.92, "Answer Key",
+        fig.text(0.5, 0.92, f"Answer Key: {title}",
                  fontsize=22, weight='bold', ha='center')
         fig.text(0.1, 0.86, "Tutor Reference Copy Only",
                  fontsize=13, weight='bold', color='#2b6cb0')
