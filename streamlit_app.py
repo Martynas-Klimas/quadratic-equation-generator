@@ -149,7 +149,7 @@ with st.container():
     col1, col2 = st.columns([2, 1], vertical_alignment="center", gap="small")
     with col1:
         st.subheader("Generation Options")
-        exercise_amount = st.slider("Choose number of exercises:", 1, 10, 5, 1, )
+        exercise_amount = st.slider("Choose number of exercises:", 1, 25, 5, 1, )
 
         option = st.radio("Choose exercise type:", [
                 "Simple quadratic equation", "Advanced quadratic equation", "Both (Mixed)"])
