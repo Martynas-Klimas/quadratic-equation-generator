@@ -9,30 +9,46 @@ def compile_pdf(worksheet_data, title):
 
     with PdfPages(pdf_buffer) as pdf:
 
+        # HELPER FUNCTION FOR HEADERS 
+        def draw_main_header(fig, title_text):
+            fig.text(
+                0.5,
+                0.93,
+                title_text.upper(),
+                fontsize=20,
+                weight="bold",
+                ha="center",
+                color="black",
+            )
+            fig.text(
+                0.1,
+                0.88,
+                "STUDENT EXERCISES",
+                fontsize=12,
+                weight="bold",
+                color="black",
+            )
+
+        def draw_running_header(fig, title_text, page_num):
+            fig.text(
+                0.1,
+                0.94,
+                f"{title_text.upper()} — Page {page_num}",
+                fontsize=12,
+                color="#666666",
+                style="italic",
+            )
+
+
         # PAGE 1: STUDENT WORKSHEET
 
         fig, ax = plt.subplots(figsize=(8.5, 11))
         ax.axis("off")
 
-        fig.text(
-            0.5,
-            0.93,
-            title.upper(),
-            fontsize=20,
-            weight="bold",
-            ha="center",
-            color="black",
-        )
-        fig.text(
-            0.1,
-            0.88,
-            "STUDENT EXERCISES",
-            fontsize=12,
-            weight="bold",
-            color="black",
-        )
+        draw_main_header(fig, title)
 
         current_y = 0.85
+        page_num = 1
 
         for i, item in enumerate(worksheet_data):
             if current_y < 0.20:
@@ -41,7 +57,11 @@ def compile_pdf(worksheet_data, title):
 
                 fig, ax = plt.subplots(figsize=(8.5, 11))
                 ax.axis("off")
-                current_y = 0.85
+
+                page_num += 1
+                draw_running_header(fig, title, page_num)
+
+                current_y = 0.90
 
             box_left = 0.1
             box_width = 0.8
@@ -111,9 +131,10 @@ def compile_pdf(worksheet_data, title):
         pdf.savefig(fig)
         plt.close(fig)
 
-        # PAGE 2: TEACHER ANSWER KEY
         fig, ax = plt.subplots(figsize=(8.5, 11))
         ax.axis("off")
+
+        #PAGE 2: Teacher answer key
 
         fig.text(
             0.5,
@@ -133,18 +154,31 @@ def compile_pdf(worksheet_data, title):
             color="#444444",
         )
 
-        current_y = 0.83
+        col = 0  
+        col_x_offsets = [0.1, 0.55] 
+        top_y = 0.83
+        current_y = top_y
 
         for i, item in enumerate(worksheet_data):
             if current_y < 0.1:
-                pdf.savefig(fig)
-                plt.close(fig)
-                fig, ax = plt.subplots(figsize=(8.5, 11))
-                ax.axis("off")
-                current_y = 0.85
+                if col == 0:
+                    col = 1
+                    current_y = top_y
+                else:
+                    pdf.savefig(fig)
+                    plt.close(fig)
+
+                    fig, ax = plt.subplots(figsize=(8.5, 11))
+                    ax.axis("off")
+
+                    col = 0
+                    current_y = top_y
+
+            x_label = col_x_offsets[col]
+            x_solution = x_label + 0.05
 
             fig.text(
-                0.1,
+                x_label,
                 current_y,
                 f"Solution {i+1}:",
                 fontsize=11,
@@ -154,7 +188,7 @@ def compile_pdf(worksheet_data, title):
 
             latex_solution = f"${item['solution']}$"
             fig.text(
-                0.15,
+                x_solution,
                 current_y - 0.025,
                 latex_solution,
                 fontsize=12,
