@@ -186,13 +186,26 @@ with st.container():
             if custom_title == "":
                 custom_title = "Quadratic equation worksheet"
             pdf_bytes = compile_pdf(st.session_state.current_worksheet, custom_title)
-            st.download_button(
+            download_clicked = st.download_button(
                 label="Download Printable PDF (Worksheet + Answer Key)",
                 data=pdf_bytes,
                 file_name=f"{custom_title.replace(' ', '_')}.pdf",
                 mime="application/pdf",
                 use_container_width=True
             )
+            if download_clicked:
+                components.html(
+                    f"""
+                    <script>
+                        window.parent.gtag('event', 'pdf_download', {{
+                            'event_category': 'engagement',
+                            'event_label': 'Quadratic Worksheet PDF'
+                        }});
+                    </script>
+                    """,
+                    height=0,
+                )
+                st.toast("Downloading PDF...")
         else:
             st.info("Click 'Generate' to create your download package.")
 
