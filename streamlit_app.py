@@ -203,7 +203,7 @@ st.write("---")
 st.markdown(
     """
     <p style="font-size: 16px; color: #6c757d;">
-        Free tool built for teachers. Need a larger classroom pack? 
+        Free tool built for teachers and tutors. Need a larger classroom pack? 
         <a href="https://www.etsy.com/listing/4549681939/quadratic-equation-worksheet-with" target="_blank" style="color: #fa6b6b; text-decoration: underline;">
             Check out our 40-problem bundle on Etsy
         </a>.
