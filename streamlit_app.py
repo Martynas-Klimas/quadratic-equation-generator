@@ -178,6 +178,17 @@ with st.container():
         else:
             st.info("Click 'Generate' to create your download package.")
 
+#BANNER
+st.write("---")
+with st.container(border=True):
+    col1, col2 = st.columns([3, 1], vertical_alignment="center")
+
+    with col1:
+        st.markdown("**Need pre-formatted problem sets?** Save time with a ready-to-print 40-problem bundle.")
+
+    with col2:
+        st.link_button("Etsy Shop", "https://www.etsy.com/listing/4549681939/quadratic-equation-worksheet-with", type="primary", width="stretch")
+
 # CLEAN LAYOUT RENDERING STEP
 st.write("---")
 st.write("### Your Generated Exercises:")
@@ -197,3 +208,4 @@ for i, item in enumerate(st.session_state.current_worksheet):
             st.write(f"$${item['solution']}$$")
 
 st.write("---")
+
