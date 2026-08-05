@@ -38,12 +38,15 @@ def format_latex_fraction(numerator, denominator):
 
 def generate_simple_equation(exercise_amount):
     problems = []
-    for _ in range(exercise_amount):
+    equations = set() 
+
+    while len(problems) < exercise_amount:
+
         r1 = random.randint(-10, 10)
         r2 = random.randint(-10, 10)
 
-        while r1 == 0 and r2 == 0:
-            r2 = random.randint(-10, 10)
+        if r1 == 0 and r2 == 0:
+            continue
 
         b = -(r1 + r2)
         c = r1 * r2
@@ -57,6 +60,12 @@ def generate_simple_equation(exercise_amount):
 
         eq_latex = f"{a_string} {b_string} {c_string} = 0"
 
+        # Check for duplicates across the entire set
+        if eq_latex in equations:
+            continue  
+
+        equations.add(eq_latex)
+
         if r1 != r2:
             sol_latex = f"x_1 = {r1}, \\quad x_2 = {r2}"
         else:
@@ -69,15 +78,17 @@ def generate_simple_equation(exercise_amount):
 
 def generate_advanced_equation(exercise_amount):
     problems = []
-    for _ in range(exercise_amount):
+    equations = set() 
+
+    while len(problems) < exercise_amount:
         d1 = random.choice([-3, -2, -1, 2, 3])
         d2 = random.choice([2, 3])
 
         r1 = random.randint(-10, 10)
         r2 = random.randint(-10, 10)
 
-        while r1 == 0 and r2 == 0:
-            r2 = random.randint(-10, 10)
+        if r1 == 0 and r2 == 0:
+            continue
 
         a = d1 * d2
         b = -(d1 * r2 + d2 * r1)
@@ -92,6 +103,11 @@ def generate_advanced_equation(exercise_amount):
 
         eq_latex = f"{a_string} {b_string} {c_string} = 0"
 
+        if eq_latex in equations:
+            continue
+
+        equations.add(eq_latex)
+
         root1_latex = format_latex_fraction(r1, d1)
         root2_latex = format_latex_fraction(r2, d2)
 
@@ -103,7 +119,6 @@ def generate_advanced_equation(exercise_amount):
         problems.append({"equation": eq_latex, "solution": sol_latex})
 
     return problems
-
 
 # Initialize State Storage Memory
 if "current_worksheet" not in st.session_state:
