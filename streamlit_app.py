@@ -5,32 +5,6 @@ from fractions import Fraction
 import streamlit.components.v1 as components
 from pdf_compiler import compile_pdf
 
-import pathlib
-
-def inject_ga(ga_id):
-    index_path = pathlib.Path(st.__file__).parent / "static" / "index.html"
-    html_content = index_path.read_text()
-    
-    # Check if GA tag is already in the file
-    if ga_id not in html_content:
-        ga_code = f"""
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id={ga_id}"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){{dataLayer.push(arguments);}}
-          gtag('js', new Date());
-          gtag('config', '{ga_id}');
-        </script>
-        """
-        # Inject right before the closing </head> tag
-        new_html = html_content.replace("</head>", f"{ga_code}</head>")
-        index_path.write_text(new_html)
-
-# Put your real ID here and run this BEFORE any other st. commands
-inject_ga("G-4HS867JQ3Z")
-
-
 #Google Analytics Tracking Snippet:
 ga_html = f"""
 <script async src="https://www.googletagmanager.com/gtag/js?id="G-4HS867JQ3Z"></script>
