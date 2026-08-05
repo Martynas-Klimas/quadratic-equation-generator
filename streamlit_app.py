@@ -6,9 +6,6 @@ import streamlit.components.v1 as components
 from pdf_compiler import compile_pdf
 
 #Google Analytics Tracking Snippet:
-
-GA_MEASUREMENT_ID = "G-4HS867JQ3Z" 
-
 ga_html = f"""
 <script async src="https://www.googletagmanager.com/gtag/js?id="G-4HS867JQ3Z"></script>
 <script>
