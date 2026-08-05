@@ -1,6 +1,8 @@
 import streamlit as st
 import random
 from fractions import Fraction
+
+import streamlit.components.v1 as components
 from pdf_compiler import compile_pdf
 
 st.markdown("""
@@ -14,6 +16,28 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
+
+
+#Google Analytics Tracking Snippet:
+
+GA_MEASUREMENT_ID = "G-4HS867JQ3Z" 
+
+ga_html = f"""
+<script async src="https://www.googletagmanager.com/gtag/js?id="G-4HS867JQ3Z"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-4HS867JQ3Z');
+
+  function trackEtsyClick() {{
+      gtag('event', 'click_etsy_bundle', {{
+          'event_category': 'outbound_link',
+          'event_label': 'Etsy 40-Problem Bundle'
+      }});
+  }}
+</script>
+"""
 
 
 a_special_cases = {1: "x^2", -1: "-x^2"}
@@ -200,15 +224,20 @@ st.write("---")
 
 #BANNER
 
-st.markdown(
-    """
-    <p style="font-size: 16px; color: #6c757d;">
-        Free tool built for teachers and tutors. Need a larger classroom pack? 
-        <a href="https://www.etsy.com/listing/4549681939/quadratic-equation-worksheet-with" target="_blank" style="color: #fa6b6b; text-decoration: underline;">
-            Check out our 40-problem bundle on Etsy
-        </a>.
-    </p>
-    """,
-    unsafe_allow_html=True
-)
+components.html(ga_html, height=0)
+
+tracked_footer = f"""
+{ga_html}
+<p style="font-size: 16px; color: #6c757d;">
+    Free tool built for teachers and tutors. Need a larger classroom pack? 
+    <a href="https://www.etsy.com/listing/4549681939/quadratic-equation-worksheet-with" 
+       target="_blank" 
+       onclick="trackEtsyClick()" 
+       style="color: #FF4B4B; text-decoration: underline;">
+        Check out our 40-problem bundle on Etsy
+    </a>.
+</p>
+"""
+
+st.markdown(tracked_footer, unsafe_allow_html=True)
 
