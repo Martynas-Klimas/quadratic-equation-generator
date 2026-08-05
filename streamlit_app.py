@@ -5,19 +5,6 @@ from fractions import Fraction
 import streamlit.components.v1 as components
 from pdf_compiler import compile_pdf
 
-st.markdown("""
-    <style>
-        /* Vaporize the header hover link chains */
-        .e16fv1kl0 a {
-            display: none !important;
-        }
-        h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
-            display: none !important;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-
 #Google Analytics Tracking Snippet:
 
 GA_MEASUREMENT_ID = "G-4HS867JQ3Z" 
@@ -39,11 +26,21 @@ ga_html = f"""
 </script>
 """
 
+st.markdown("""
+    <style>
+        /* Vaporize the header hover link chains */
+        .e16fv1kl0 a {
+            display: none !important;
+        }
+        h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+            display: none !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 a_special_cases = {1: "x^2", -1: "-x^2"}
 b_special_cases = {1: "+ x", -1: "- x", 0: ""}
 c_special_cases = {0: ""}
-
 
 def format_latex_fraction(numerator, denominator):
     f = Fraction(numerator, denominator)
