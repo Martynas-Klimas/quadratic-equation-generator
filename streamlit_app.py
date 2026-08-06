@@ -237,11 +237,11 @@ tracked_footer = f"""
 {ga_html}
 <p style="font-size: 16px; color: #6c757d;">
     Free tool built for teachers and tutors. Need a larger classroom pack? 
-    <a href="https://www.etsy.com/listing/4549681939/quadratic-equation-worksheet-with" 
+    <a href="https://www.etsy.com/shop/MartinsPrintablStore?utm_source=streamlit_app" 
        target="_blank" 
        onclick="trackEtsyClick()" 
        style="color: #FF4B4B; text-decoration: underline;">
-        Check out our 40-problem bundle on Etsy
+        Check out the Etsy Shop
     </a>.
 </p>
 """
