@@ -20,6 +20,12 @@ def get_client() -> Client:
     key = st.secrets["SUPABASE_KEY"]
     return create_client(url, key)
 
+@st.cache_resource
+def get_admin_client() -> Client:
+    url = st.secrets["SUPABASE_URL"]
+    service_key = st.secrets["SUPABASE_SERVICE_KEY"]
+    return create_client(url, service_key)
+
 # Visitor identity (persistent across sessions via cookie)
 
 def get_visitor_id() -> str:
@@ -50,7 +56,7 @@ def log_event(visitor_id: str, event_type: str, meta: dict | None = None):
         "event_type": event_type,
         "meta": meta or {},
         "ts": datetime.now(timezone.utc).isoformat(),
-    }).execute()
+    }, returning="minimal").execute()
 
 
 # Admin dashboard — call this behind a query param / password, not publicly
@@ -58,7 +64,7 @@ def log_event(visitor_id: str, event_type: str, meta: dict | None = None):
 def show_admin_dashboard():
     import pandas as pd
 
-    client = get_client()
+    client = get_admin_client()
     response = client.table("events").select("*").order("ts", desc=True).limit(10000).execute()
     df = pd.DataFrame(response.data)
 
@@ -68,7 +74,8 @@ def show_admin_dashboard():
         st.info("No events logged yet.")
         return
 
-    df["ts"] = pd.to_datetime(df["ts"])
+    
+    df["ts"] = pd.to_datetime(df["ts"], format="ISO8601")
     df["date"] = df["ts"].dt.date
 
     distinct_visitors = df["visitor_id"].nunique()
@@ -91,8 +98,20 @@ def show_admin_dashboard():
     col6.metric("Visitors who generated ≥1", visitors_who_generated)
 
     st.subheader("Events by day")
-    daily = df.groupby(["date", "event_type"]).size().unstack(fill_value=0)
-    st.bar_chart(daily)
+    daily = df.groupby(["date", "event_type"]).size().reset_index(name="count")
+    daily["date"] = daily["date"].astype(str)
+ 
+    import plotly.express as px
+ 
+    fig = px.bar(
+        daily,
+        x="date",
+        y="count",
+        color="event_type",
+        barmode="group",  # side-by-side bars instead of stacked
+    )
+    fig.update_yaxes(rangemode="tozero")
+    st.plotly_chart(fig, use_container_width=True)
 
     st.subheader("Event breakdown")
     st.dataframe(df["event_type"].value_counts().rename("count"))

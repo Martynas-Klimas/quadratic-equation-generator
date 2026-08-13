@@ -5,6 +5,10 @@ from fractions import Fraction
 import streamlit.components.v1 as components
 from pdf_compiler import compile_pdf
 
+import streamlit_analytics2 as streamlit_analytics
+
+from tracker import get_visitor_id, log_event, show_admin_dashboard
+
 a_special_cases = {1: "x^2", -1: "-x^2"}
 b_special_cases = {1: "+ x", -1: "- x", 0: ""}
 c_special_cases = {0: ""}
@@ -109,96 +113,129 @@ def generate_advanced_equation(exercise_amount):
     return problems
 
 # Initialize State Storage Memory
-if "current_worksheet" not in st.session_state:
-    st.session_state.current_worksheet = []
 
-st.title("Quadratic equation generator")
-st.write("Let's start generating!")
+if st.query_params.get("admin") == "1":
+    pwd = st.text_input("Admin password", type="password")
+    if pwd == st.secrets["ADMIN_PASSWORD"]:
+        show_admin_dashboard()
+    elif pwd:
+        st.error("Incorrect password")
+    st.stop()
 
-with st.container():
-    col1, col2 = st.columns([2, 1], vertical_alignment="center", gap="small")
-    with col1:
-        st.subheader("Generation Options")
-        exercise_amount = st.slider("Choose number of exercises:", 1, 10, 5, 1, )
+st.cache_resource.clear()
 
-        option = st.radio("Choose exercise type:", [
-                "Simple quadratic equation", "Advanced quadratic equation", "Both (Mixed)"])
+with streamlit_analytics.track():
 
-        custom_title = st.text_input(
-            label="Worksheet Title:", 
-            value="Quadratic Equation Worksheet",
-            help="This text will print as the main heading at the top of your PDF."
-        )
+    visitor_id = get_visitor_id()
 
-        if st.button("🔄 Generate Exercises") or not st.session_state.current_worksheet:
-            if option == "Simple quadratic equation":
-                st.session_state.current_worksheet = generate_simple_equation(
-                    exercise_amount)
+    if "page_view_logged" not in st.session_state:
+        log_event(visitor_id, "page_view")
+        st.session_state.page_view_logged = True
 
-            elif option == "Advanced quadratic equation":
-                st.session_state.current_worksheet = generate_advanced_equation(
-                    exercise_amount)
+    if "current_worksheet" not in st.session_state:
+        st.session_state.current_worksheet = []
 
-            else:  
-                half = exercise_amount // 2
-                remainder = exercise_amount - half
+    st.title("Quadratic equation generator")
+    st.write("Let's start generating!")
 
-                simple_part = generate_simple_equation(half)
-                advanced_part = generate_advanced_equation(remainder)
+    with st.container():
+        col1, col2 = st.columns([2, 1], vertical_alignment="center", gap="small")
+        with col1:
+            st.subheader("Generation Options")
+            exercise_amount = st.slider("Choose number of exercises:", 1, 10, 5, 1, )
 
-                combined_list = simple_part + advanced_part
-                random.shuffle(combined_list)
+            option = st.radio("Choose exercise type:", [
+                    "Simple quadratic equation", "Advanced quadratic equation", "Both (Mixed)"])
 
-                st.session_state.current_worksheet = combined_list
-    with col2:
-        st.subheader("Export Options")
-        if "current_worksheet" in st.session_state and st.session_state.current_worksheet:
-            if custom_title == "":
-                custom_title = "Quadratic equation worksheet"
-            pdf_bytes = compile_pdf(st.session_state.current_worksheet, custom_title)
-            st.download_button(
-                label="Download Printable PDF (Worksheet + Answer Key)",
-                data=pdf_bytes,
-                file_name=f"{custom_title.replace(' ', '_')}.pdf",
-                mime="application/pdf",
-                use_container_width=True
+            custom_title = st.text_input(
+                label="Worksheet Title:", 
+                value="Quadratic Equation Worksheet",
+                help="This text will print as the main heading at the top of your PDF."
             )
-        else:
-            st.info("Click 'Generate' to create your download package.")
 
-# CLEAN LAYOUT RENDERING STEP
-st.write("---")
-st.write("### Your Generated Exercises:")
+            if st.button("🔄 Generate Exercises") or not st.session_state.current_worksheet:
+                if option == "Simple quadratic equation":
+                    st.session_state.current_worksheet = generate_simple_equation(
+                        exercise_amount)
 
-for i, item in enumerate(st.session_state.current_worksheet):
-    # Split the row into two clean columns
-    col1, col2 = st.columns(2, vertical_alignment="center")
+                elif option == "Advanced quadratic equation":
+                    st.session_state.current_worksheet = generate_advanced_equation(
+                        exercise_amount)
 
-    with col1:
-        st.write(f"**Exercise {i+1}:**")
-        st.write(f"$${item['equation']}$$")
+                else:  
+                    half = exercise_amount // 2
+                    remainder = exercise_amount - half
 
-    with col2:
-        # Sneak a blank string in to visually balance vertical alignment with the equation
-        st.write("")
-        with st.expander("Show Solution"):
-            st.write(f"$${item['solution']}$$")
+                    simple_part = generate_simple_equation(half)
+                    advanced_part = generate_advanced_equation(remainder)
 
-st.write("---")
+                    combined_list = simple_part + advanced_part
+                    random.shuffle(combined_list)
 
-#BANNER
+                    st.session_state.current_worksheet = combined_list
+                log_event(
+                    visitor_id,
+                    "worksheet_generated",
+                    meta={
+                        "topic": "quadratics",
+                        "exercise_type": option,
+                        "count": exercise_amount,
+                    },
+                )
+        with col2:
+            st.subheader("Export Options")
+            if "current_worksheet" in st.session_state and st.session_state.current_worksheet:
+                if custom_title == "":
+                    custom_title = "Quadratic equation worksheet"
+                pdf_bytes = compile_pdf(st.session_state.current_worksheet, custom_title)
+                if st.download_button(
+                    label="Download Printable PDF (Worksheet + Answer Key)",
+                    data=pdf_bytes,
+                    file_name=f"{custom_title.replace(' ', '_')}.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                ):
+                    log_event(
+                        visitor_id,
+                        "pdf_downloaded",
+                        meta={
+                            "topic": "quadratics",
+                            "exercise_type": option,
+                            "count": exercise_amount,
+                        },
+                    )
+            else:
+                st.info("Click 'Generate' to create your download package.")
 
+    # CLEAN LAYOUT RENDERING STEP
+    st.write("---")
+    st.write("### Your Generated Exercises:")
 
-tracked_footer = f"""
-<p style="font-size: 16px; color: #6c757d;">
-    Free tool built for teachers and tutors. Need a larger classroom pack? 
-    <a href="https://www.etsy.com/shop/MartinsPrintablStore?utm_source=streamlit_app" 
-       target="_blank" 
-       style="color: #FF4B4B; text-decoration: underline;">
-        Check out the Etsy Shop
-    </a>.
-</p>
-"""
+    for i, item in enumerate(st.session_state.current_worksheet):
+        # Split the row into two clean columns
+        col1, col2 = st.columns(2, vertical_alignment="center")
 
-st.markdown(tracked_footer, unsafe_allow_html=True)
+        with col1:
+            st.write(f"**Exercise {i+1}:**")
+            st.write(f"$${item['equation']}$$")
 
+        with col2:
+            # Sneak a blank string in to visually balance vertical alignment with the equation
+            st.write("")
+            with st.expander("Show Solution"):
+                st.write(f"$${item['solution']}$$")
+
+    st.write("---")
+
+    #BANNER
+    st.markdown(
+        """
+        <p style="font-size: 16px; color: #6c757d;">
+            Free tool built for teachers. Need a larger classroom pack? 
+            <a href="https://www.etsy.com/shop/MartinsPrintablStore?utm_source=streamlit_app" target="_blank" style="color: #FF4B4B; text-decoration: underline;">
+                Check out our Etsy Shop
+            </a>.
+        </p>
+        """,
+        unsafe_allow_html=True
+)
