@@ -148,7 +148,7 @@ venv.bak/
 dmypy.json
 
 # toml
-.toml
+secrets.toml
 
 # Pyre type checker
 .pyre/
