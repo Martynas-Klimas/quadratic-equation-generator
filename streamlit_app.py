@@ -5,36 +5,6 @@ from fractions import Fraction
 import streamlit.components.v1 as components
 from pdf_compiler import compile_pdf
 
-#Google Analytics Tracking Snippet:
-ga_html = f"""
-<script async src="https://www.googletagmanager.com/gtag/js?id="G-4HS867JQ3Z"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){{dataLayer.push(arguments);}}
-  gtag('js', new Date());
-  gtag('config', 'G-4HS867JQ3Z');
-
-  function trackEtsyClick() {{
-      gtag('event', 'click_etsy_bundle', {{
-          'event_category': 'outbound_link',
-          'event_label': 'Etsy 40-Problem Bundle'
-      }});
-  }}
-</script>
-"""
-
-st.markdown("""
-    <style>
-        /* Vaporize the header hover link chains */
-        .e16fv1kl0 a {
-            display: none !important;
-        }
-        h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
-            display: none !important;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 a_special_cases = {1: "x^2", -1: "-x^2"}
 b_special_cases = {1: "+ x", -1: "- x", 0: ""}
 c_special_cases = {0: ""}
@@ -186,26 +156,13 @@ with st.container():
             if custom_title == "":
                 custom_title = "Quadratic equation worksheet"
             pdf_bytes = compile_pdf(st.session_state.current_worksheet, custom_title)
-            download_clicked = st.download_button(
+            st.download_button(
                 label="Download Printable PDF (Worksheet + Answer Key)",
                 data=pdf_bytes,
                 file_name=f"{custom_title.replace(' ', '_')}.pdf",
                 mime="application/pdf",
                 use_container_width=True
             )
-            if download_clicked:
-                components.html(
-                    f"""
-                    <script>
-                        window.parent.gtag('event', 'pdf_download', {{
-                            'event_category': 'engagement',
-                            'event_label': 'Quadratic Worksheet PDF'
-                        }});
-                    </script>
-                    """,
-                    height=0,
-                )
-                st.toast("Downloading PDF...")
         else:
             st.info("Click 'Generate' to create your download package.")
 
@@ -231,15 +188,12 @@ st.write("---")
 
 #BANNER
 
-components.html(ga_html, height=0)
 
 tracked_footer = f"""
-{ga_html}
 <p style="font-size: 16px; color: #6c757d;">
     Free tool built for teachers and tutors. Need a larger classroom pack? 
     <a href="https://www.etsy.com/shop/MartinsPrintablStore?utm_source=streamlit_app" 
        target="_blank" 
-       onclick="trackEtsyClick()" 
        style="color: #FF4B4B; text-decoration: underline;">
         Check out the Etsy Shop
     </a>.
